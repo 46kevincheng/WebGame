@@ -1,0 +1,458 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
+    <!-- <script src="./dist/phaser.js"></script> 
+    <script src="./dist/phaser.min.js"></script>  -->
+</head>
+<style type="text/css">
+    body
+    {
+        display: block;
+        margin: 0 auto;
+    }
+</style>
+<body>
+    <script>
+        const config=
+        {
+            backgroundColor:"#000000",
+            type: Phaser.AUTO,
+            scale:
+            {
+                //mode:Phaser.Scale.FIT,
+                autoCenter:Phaser.Scale.CENTER_BOTH,
+                width: 1000,
+                height: 800,
+            },
+            physics:
+            {
+                default: 'arcade',
+                arcade:{
+                    debug:false,
+                    gravity:false
+                }
+            },
+            scene:
+            {
+                preload: preload,
+                create: create,
+                update: update
+            },
+        }
+        var game = new Phaser.Game(config);
+        let shan,akon; // two characters
+        let cursors; // read from keyboard
+        let player;
+        let target;
+        let grasses;
+        let myFont = {font:'25px Times New Roman', fill:'balck'};
+        let nextFont = {fontSize: '30px',fontFamily:'標楷體', fill:'white',backgroundColor:'black',align:'center'};
+        let stagestatus;
+        let nextstageText;
+        let trynum = 0;
+        let tryText;
+        let nextpagebtn ;
+        let OKbtn;
+        let OKbtnonclick =  0 ; // 0 init 1 press 2 end
+        let introduce;
+        let targetColl ;
+        // add audio
+        let bgm;
+        let audioCollide ;
+        let audioClickBtn ;
+        let audioGameOver ;
+        let audioHoverBtn ;
+        let audioDoorOpen ;
+        let audioWin ;
+        let audioFootstep ;
+        let isMoving = false;
+
+        let fog1,fog2,fog3,fog4;
+        let fogchange;
+        let tileSprite;
+        let backcam;
+        let camera;
+        let timercamera;
+        let mutecam ;
+        let roads;
+        // timer (設定關卡時間限制)
+        let min = 0 ;
+        let sec = 44 ;
+        let tmpzero = 0 ;
+        let timerText ;
+        let restartBtn ;
+        let restartText;
+
+        function preload()
+        {
+            //load two main characters
+            this.load.image('bg','assets/biggrass.png');
+            this.load.image('akon','assets/akon.png');
+            this.load.image('grass','assets/grass.png');
+            this.load.image('wall','assets/wall.png');
+            this.load.image('wood','assets/wood.jpg');
+            this.load.image('nextpagebutton','assets/nextpage.png');
+            this.load.image('door','assets/door.png');
+            this.load.image('intro','assets/maze1intro.png');
+            this.load.image('ok','assets/OKbtn.png');
+            this.load.audio('bgm','../audio/bgmusic.wav');
+            this.load.audio('audioCollide','../audio/impact.wav') ;
+            this.load.audio('audioClickBtn','../audio/click4.mp3') ;
+            this.load.audio('audioGameOver','../audio/sad2.mp3') ;
+            this.load.audio('audioHoverBtn','../audio/click2.mp3') ;
+            this.load.audio('audioDoorOpen','../audio/doorwood_open.wav') ;
+            this.load.audio('audioWin','../audio/victory1.mp3') ;
+            this.load.image('speaker', 'assets/speaker.png');
+            this.load.image('mute', 'assets/mute.png');
+            this.load.image('fog','assets/fogg.png') ;
+            this.load.image('restartbtn','assets/restart.png') ;
+            this.load.image('timesuppic','assets/timesup.png') ;
+            this.load.audio('audioFootstep','../audio/footstep2.ogg') ;
+            this.load.image('passpic','assets/pass.png');
+        }
+        
+        function create()
+        {
+
+            //add audio
+            bgm = this.sound.add('bgm',{volume:0.7,loop:true});
+            bgm.play();
+            audioCollide = this.sound.add('audioCollide') ;
+            audioCollide.setVolume(0.2) ;
+            audioClickBtn = this.sound.add('audioClickBtn') ;
+            audioGameOver = this.sound.add('audioGameOver',{volume:0.8,loop:true}) ;
+            audioHoverBtn = this.sound.add('audioHoverBtn') ;
+            audioDoorOpen = this.sound.add('audioDoorOpen') ;
+            audioWin = this.sound.add('audioWin',{volume:0.3,loop:true}) ;
+            audioFootstep =this.sound.add('audioFootstep',{volume:0.08,loop:true}) ;
+            audioFootstep.play() ;
+            audioFootstep.pause() ;
+
+            this.add.image(config.scale.width/2,config.scale.height/2,'bg');
+            //end point
+            roads = this.physics.add.group();
+            for(var i=0;i<config.scale.width/50;i++)
+            {
+                for(var j=0 ; j<config.scale.height/50;j++ )
+                {
+                    //this.add.image(50*i+10,25*j+10,'wall');
+                    //roads.createMultiple([{key:'wall', repeat: 1, setXY:{x:50*i+10 , y:25*j+10}}])
+                    roads.createMultiple([{key:'wall', repeat: 1, setXY:{x:50*i+25 , y:50*j+25}}])
+                }
+            }
+
+            // for(var j=0;j<=config.scale.width/25;j++)
+            //     this.add.image(50*j+25,25,'wood');
+
+            //add grass to background
+            //grass use matrix
+            var gra = [
+                [25,75,125,175,225,275,325,375,425,475,525,575,625,675,725],
+                [25,75,125,175,225,275,325,375,425,475,525,575,625,675,825,875,925,975],
+                [25,75,125,175,225,275,325,375,425,475,525,575,625,775,825,875,925,975],
+                [25,75,125,175,225,275,325,375,425,475,525,575,725,775,825,875,925,975],
+                [25,75,125,175,225,275,325,375,425,475,525,725,775,825,875,925,975],
+                [25,75,125,175,225,275,325,375,425,625,675,725,775,825,875,925,975],
+                [25,75,125,175,225,275,325,375,525,575,625,675,725,775,825,875,925,975],
+                [25,75,125,175,225,275,325,375,425,575,625,675,725,775,825,875,925,975],
+                [25,75,125,175,225,275,325,375,425,475,625,675,725,775,825,875,925,975],
+                [25,75,125,175,225,275,325,375,425,475,675,725,775,825,875,925,975],
+                [25,75,125,175,225,275,325,375,425,625,675,725,775,825,875,925,975],
+                [25,75,125,175,225,275,325,375,425,575,625,675,725,775,825,875,925,975],
+                [25,75,125,175,225,275,325,375,425,475,625,675,725,775,825,875,925,975],
+                [25,75,125,175,225,275,325,375,425,475,675,725,775,825,875,925,975],
+                [25,75,125,175,225,275,325,375,425,475,525,725,775,825,875,925,975],
+                [25,75,125,175,225,275,325,375,425,475,525,575,725,775,825,875,925,975]
+                
+            ];
+
+
+            grasses = this.physics.add.group();
+            for(var i=0;i<16;i++)
+            {
+                for(var j=0;j<gra[i].length;j++)
+                {
+                    grasses.createMultiple([{key:'grass', repeat: 1, setXY:{x:gra[i][j] , y:50*(i+1)-25}}])
+                }
+            }
+            grasses.children.iterate((child)=>
+            {
+                child.setImmovable();
+            });
+
+            //add two main characters in canvas
+            target = this.physics.add.image(925,25,'door').setScale(0.1);
+
+            //set sursors can get info from keybaord
+            cursors = this.input.keyboard.createCursorKeys();
+            this.input.mouse.disableContextMenu;
+            this.input.keyboard.enabled=false ;
+
+            //akon control
+            player = this.physics.add.sprite(config.scale.width-355,config.scale.height-25,'akon').setScale(0.5);
+            
+            //player collider setup
+            player.setCollideWorldBounds(true)
+
+            //fog1~4
+            fog1 = this.add.image(250,200,'fog').setAlpha(0);
+            fog2 = this.add.image(850,200,'fog').setAlpha(0);
+            fog3 = this.add.image(250,600,'fog').setAlpha(0);
+            fog4 = this.add.image(750,600,'fog').setAlpha(0);
+            fogchange = setInterval(fogall,500);
+
+            //collider setup
+            this.physics.add.collider(player, grasses, restart);
+            targetColl = this.physics.add.collider(player, target, nextstage);
+
+            // text 設定
+            nextstageText = this.add.image(config.scale.width/2, config.scale.height/2,'passpic').setScale(0.6);
+            nextstageText.setVisible(false);
+            timerText = this.add.text(5,config.scale.height-100,"Time: 0:45", myFont);
+            timerText.setVisible(true) ;
+            restartText = this.add.image(config.scale.width/2, config.scale.height/2,'timesuppic').setScale(0.6);
+            restartText.setVisible(false) ;
+            
+            //player and grass detect
+
+            // go to next page
+            nextpagebtn = this.add.sprite(config.scale.width/2 - 8,config.scale.height/2 + 40,'nextpagebutton').setScale(0.12).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play() ;
+                nextpagebtn.setScale(0.14);
+            })
+            .on('pointerout',() => {
+                nextpagebtn.setScale(0.12);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play() ;
+                console.log("next page") ;
+                window.location.href="../story/story2.html" ;
+            })
+            nextpagebtn.setVisible(false) ;
+
+            // 關卡介紹
+            introduce = this.add.image(500,400,'intro').setScale(0.5);
+            OKbtn = this.add.sprite(500,485,'ok').setScale(0.2).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play() ;
+                OKbtn.setScale(0.22);
+            })
+            .on('pointerout',() => {
+                OKbtn.setScale(0.2);
+            })
+            .on('pointerdown',() => {
+                this.input.keyboard.enabled=true ;
+                audioClickBtn.play() ;
+                OKbtnonclick = 1;
+                OKbtn.setVisible(false);
+                introduce.setVisible(false);
+                timerText.setVisible(true) ;
+                myVal = setInterval(setTimer, 1000);
+            })
+            //bgm control
+            let playmusic = true ;
+            let speaker = this.add.image(25,config.scale.height-25,'speaker').setInteractive()
+            .on('pointerdown',()=>
+            {
+                if(speaker.texture.key == 'speaker')
+                {
+                    speaker.setTexture('mute');
+                }
+                else
+                {
+                    speaker.setTexture('speaker');
+                }
+                if(playmusic==false)
+                {
+                    playmusic = true ;
+                    bgm.setMute(false);
+                    audioGameOver.setMute(false);
+                    audioWin.setMute(false);
+                }
+                else
+                {
+                    playmusic = false;
+                    bgm.setMute(true);
+                    audioGameOver.setMute(true);
+                    audioWin.setMute(true);
+                }
+            });
+            // 時間倒數完->關卡失敗->關卡重新
+            restartBtn = this.add.sprite(config.scale.width/2 -5,config.scale.height/2+40,'restartbtn').setScale(0.2).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play() ;
+                restartBtn.setScale(0.22);
+            })
+            .on('pointerout',() => {
+                restartBtn.setScale(0.2);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play() ;
+                console.log("click") ;
+                setTimeout("location.reload(true);", 100);  // refresh page after 0.1 secs
+                //location.reload(10000);    // refresh page
+                console.log("refresh") ;
+            })
+            restartBtn.setVisible(false) ;
+
+            // 鏡頭設定
+            camera = this.cameras.main;
+            camera.setViewport(0,0,config.scale.width,config.scale.height);
+            camera.setVisible(true);
+
+            backcam = this.cameras.add(0,0,config.scale.width,config.scale.height);
+            backcam.setVisible(false);
+
+            timercamera = this.cameras.add(-100,0,250,50);
+            timercamera.startFollow(timerText);
+            timercamera.setVisible(false);
+
+            mutecam = this.cameras.add(-100,50,250,50);
+            mutecam.startFollow(speaker);
+            mutecam.setVisible(false);
+
+            camera.setBounds(0,0,config.scale.width,config.scale.height);
+            backcam.setBounds(0,0,config.scale.width,config.scale.height);
+            //timercamera.setBounds(0,0,config.scale.width,config.scale.height);
+            //mutecam.setBounds(0,0,config.scale.width,config.scale.height);
+    
+        }
+        function setTimer()
+        {
+            // show timer text
+            if(sec==0){
+                timerText.text="Time: " + min + ":" + sec + tmpzero;
+            }else if(sec<10){
+                timerText.text="Time: " + min + ":" + tmpzero + sec;
+            }else{
+                timerText.text="Time: " + min + ":" + sec ;
+            }
+
+            sec--;
+            if(sec<0){
+                clearInterval(myVal) ;
+                gameover() ;
+            }
+        }
+        function nextstage() // collide door
+        {
+            bgm.pause() ;
+            clearInterval(myVal) ;
+            audioDoorOpen.play() ;
+            setTimeout("audioWin.play()", 1500);
+            OKbtnonclick = 2;
+            backcam.setVisible(true);
+            camera.setVisible(false);
+            nextpagebtn.setVisible(true) ;
+            targetColl.active = false ;
+            player.setPosition(925,30) ;
+            nextstageText.setVisible(true);
+            console.log("pos:", player.x, player.y) ;
+            console.log("nextstage") ;
+        }
+        function restart()  // collide wall
+        {
+            audioCollide.play() ;
+            player.setPosition(config.scale.width-355,config.scale.height-25);    // starting point
+            //player.setPosition(850,25); // testing
+            console.log("restart") ;
+        }
+        function gameover()
+        {
+            OKbtnonclick = 2 ;  // change camera
+            bgm.stop() ;
+            audioGameOver.play() ;
+            restartText.setVisible(true) ;
+            restartBtn.setVisible(true) ;
+            backcam.setVisible(true);
+            camera.setVisible(false);
+            console.log("gameover") ;
+        }
+
+
+        function update()
+        {
+            //random alpha
+            if(OKbtnonclick == 1)
+            {
+                camera.setZoom(2.5);
+                camera.zoom = 2.5;
+                camera.startFollow(player);
+                timercamera.setVisible(true);
+                mutecam.setVisible(true);
+            }
+            else if (OKbtnonclick == 2)
+            {
+                this.input.keyboard.enabled = false ;
+                camera.zoom = 0.8 ;
+                camera.setZoom(0.8) ;
+                camera.startFollow(restartBtn) ;
+                this.cameras.remove(timercamera);
+                this.cameras.remove(mutecam);
+                audioFootstep.setMute(true);
+            }
+            // keyboard control character
+            if(OKbtnonclick!=2){
+                if(cursors.left.isDown)
+                {
+                    player.x += -5;
+                }
+                else if(cursors.right.isDown)
+                {
+                    player.x += 5;
+                }
+                else if(cursors.up.isDown)
+                {
+                    player.y += -5;
+                }
+                else if(cursors.down.isDown)
+                {
+                    player.y += 5;
+                }
+            }
+            // add footsteps
+            if((cursors.left.isDown || cursors.right.isDown || cursors.up.isDown || cursors.down.isDown) && !isMoving){
+                audioFootstep.resume() ;
+                this.isMoving=true ;
+            }else{
+                audioFootstep.pause() ;
+                this.isMoving=false ;
+            }
+
+        }
+        function fogall()
+        {
+            var rnum = roadRandom();
+            roads.setAlpha(rnum);
+            grasses.setAlpha(rnum);
+            fog1.setAlpha(generateRandomNumber());
+            fog2.setAlpha(generateRandomNumber());
+            fog3.setAlpha(generateRandomNumber());
+            fog4.setAlpha(generateRandomNumber());
+            console.log("change");
+        }
+        function roadRandom()
+        {
+            var min = 0;
+            var max = 0.600;
+            var RNumber = Math.random() * (max - min) + min;
+            return RNumber;
+        }
+        function generateRandomNumber() 
+        {
+            var min = 0.800;
+            var max = 1.000;
+            var highlightedNumber = Math.random() * (max - min) + min;
+            return highlightedNumber;
+        }
+        function render() 
+        {
+            this.debug.cameraInfo(this.camera, 32, 32);
+            this.debug.spriteCoords(player, 32, 500);
+        }
+    </script>
+</body>

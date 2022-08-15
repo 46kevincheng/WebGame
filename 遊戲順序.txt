@@ -1,0 +1,5 @@
+story/startGame > 
+story1 > game1 >
+story2 > story3 > story4 > game2 >
+story5 > game3 > story6 > ending > start
+

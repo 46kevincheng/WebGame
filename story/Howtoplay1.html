@@ -1,0 +1,104 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
+</head>
+
+<style type="text/css">
+    body{
+        margin: 0;
+    }
+</style>
+<body>
+<script>
+    //設定
+    const config={
+        type:Phaser.AUTO,
+        width:1000,
+        height:800,
+        physics:{
+            default: 'arcade',
+            arcade:{
+                gravity: {y:200}
+            }
+        },
+        scene:{
+            preload:preload,
+            create:create,
+            update:update
+        },
+        scale:{
+            mode: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.CENTER_BOTH
+        }
+    };
+    //const game = new Phaser.Game(config);
+    var game = new Phaser.Game(config);
+
+    function preload(){
+        
+       
+       
+        this.load.image('skip','finalassets/skip.png');
+        this.load.image('start','finalassets/start3.png');
+        this.load.image('g2backgroumd','finalassets/t1.png');
+        this.load.image('Home','finalassets/Home.png');
+        this.load.image('goback','finalassets/goback.png');
+        
+    }
+
+    let backGround;
+    let GoalText1;
+    let GoBackbtn;
+    let StartGame;
+    
+
+    function create()
+    {
+        
+        this.add.image(config.width/2,70,'g2backgroumd').setScale(1);
+        
+        
+
+        let myFont = {font: '36px 微軟正黑體', fill:'white'};
+        let myFont2 = {font: '32px 微軟正黑體', fill:'white'};
+        
+        
+        GoalText1=this.add.text(config.width/2 , config.height/2 -200, "遊戲目標", myFont).setOrigin(0.5);
+        GoalText2=this.add.text(config.width/2 , config.height/2 -100, "讓阿康在時間內穿越迷霧抵達教室", myFont2).setOrigin(0.5);
+        
+
+        GoalText1.setVisible(true);
+        
+        StartGame= this.add.sprite(config.width/2, config.height/2 + 250,'start').setScale(0.13).setInteractive()
+            .on('pointerover',() => {
+                StartGame.setScale(0.2);
+            })
+            .on('pointerout',() => {
+                StartGame.setScale(0.13);
+            })
+            .on('pointerdown',() => {
+                
+               
+                
+                window.location.href="Gamestory2.html" ;
+
+            })
+
+
+            
+            
+
+            
+
+
+    }
+
+    function update()
+    {
+        
+    }
+
+</script>
+</body>

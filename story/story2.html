@@ -1,0 +1,222 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
+</head>
+
+<style type="text/css">
+    body{
+        margin: 0;
+    }
+</style>
+<body>
+<script>
+    //設定
+    const config={
+        type:Phaser.AUTO,
+        width:1000,
+        height:800,
+        physics:{
+            default: 'arcade',
+            arcade:{
+                gravity: {y:200}
+            }
+        },
+        scene:{
+            preload:preload,
+            create:create,
+            update:update
+        },
+        scale:{
+            mode: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.CENTER_BOTH
+        }
+    };
+    //const game = new Phaser.Game(config);
+    var game = new Phaser.Game(config);
+
+    function preload(){
+        this.load.image('skip','finalassets/skip.png');
+        this.load.image('nextpage','finalassets/nextpage.png');
+        this.load.image('g2backgroumd','finalassets/p2.jpg');
+        this.load.image('bird','finalassets/p7.jpg');
+        this.load.image('Home','finalassets/Home.png');
+        this.load.image('goback','finalassets/goback.png');
+        this.load.image('startbtn','finalassets/start3.png');
+        this.load.audio('audioClickBtn','../audio/click4.mp3') ;
+        this.load.audio('audioHoverBtn','../audio/click2.mp3') ;
+        this.load.audio('audioBG','../audio/flyffbg3.mp3') ;
+    }
+
+    let backGround;
+    let FristRoundText3;
+    let FristRoundText4;
+    let GoNextPageBtn3;
+    let GoNextPageBtn4;
+    let GoToHomePage;
+    let GoBackbtn2;
+    let GoBackbtn3;
+    // audio
+    let audioClickBtn ;
+    let audioHoverBtn ;
+    let audioBG ;
+   
+    let Skip2;
+
+
+    function create()
+    {
+        //add audio
+        audioBG = this.sound.add('audioBG',{volume:0.4,loop:true});
+        audioBG.play();
+        audioClickBtn = this.sound.add('audioClickBtn') ;
+        audioHoverBtn = this.sound.add('audioHoverBtn') ;
+        
+        this.add.image(config.width/2,40,'g2backgroumd').setScale(1.3);
+
+        let myFont = {font: '32px 微軟正黑體', fill:'white'};
+       
+        FristRoundText3= this.add.text(config.width/2 +30, config.height/2 , "經過一番遊走，\n阿康終於走出迷霧陣，\n他走到九館裡的空教室開始呼呼大睡，\n不知道什麼時候，\n四周響起歌劇，\n阿康被這魔性的吸引開始朝聲音發出的地方前進，\n一路走著…，從一樓走到B1實驗室，\n再走到B2演藝廳。", myFont).setOrigin(0.5);
+        FristRoundText4= this.add.text(config.width/2 +30, config.height/2 , "當阿康到演藝廳時，\n忽然想起低音提琴傳說，精神都回來了。\n 阿康: 阿我怎會在這，我不是要回宿舍嗎，\n哀一定是喝太醉的關係，\n這裡太陰森了趕快回去吧。\n 但已經來不及了，演藝廳的門慢慢打開，\n一股強大的吸力把阿康吸進去。\n阿… 阿…阿康尖叫著，\n幾秒後，外面的走廊已經沒有了任何人影了。\n", myFont).setOrigin(0.5);
+        
+        FristRoundText3.setVisible(true);
+        FristRoundText4.setVisible(false);
+        
+        GoNextPageBtn3 = this.add.sprite(config.width/2, config.height/2+250,'nextpage').setScale(0.14).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play();
+                GoNextPageBtn3.setScale(0.18);
+            })
+            .on('pointerout',() => {
+                GoNextPageBtn3.setScale(0.14);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play();
+                FristRoundText3.setVisible(false);
+                FristRoundText4.setVisible(true);    
+                GoNextPageBtn3 .setVisible(false);
+                GoNextPageBtn4.setVisible(true);
+                Skip2.setVisible(true);
+                GoBackbtn2.setVisible(false);
+                GoBackbtn3.setVisible(true);
+                
+            })
+
+        Skip2 = this.add.sprite(config.width/2+400, config.height/2 +350,'skip').setScale(0.09 ).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play();
+                Skip2.setScale(0.12);
+            })
+            .on('pointerout',() => {
+                Skip2.setScale(0.09);
+            })
+            .on('pointerdown',() => {   
+                audioClickBtn.play();
+                FristRoundText3.setVisible(false);
+                FristRoundText4.setVisible(false);
+                GoNextPageBtn3.setVisible(false);
+                GoNextPageBtn4.setVisible(false);
+                GoToHomePage.setVisible(false);
+                Skip2.setVisible(false);
+                GoBackbtn2.setVisible(false);
+                GoBackbtn3.setVisible(false);
+                window.location.href="story3.html" ;
+
+                
+            })
+
+            GoNextPageBtn4 = this.add.sprite(config.width/2, config.height/2 + 250,'nextpage').setScale(0.13).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play();
+                GoNextPageBtn4.setScale(0.15);
+            })
+            .on('pointerout',() => {
+                GoNextPageBtn4.setScale(0.13);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play();
+                FristRoundText3.setVisible(false);
+                FristRoundText4.setVisible(false);             
+                GoNextPageBtn3.setVisible(false);
+                GoNextPageBtn4.setVisible(false);
+                GoToHomePage.setVisible(false);
+                Skip2.setVisible(false);
+                GoBackbtn2.setVisible(false);
+                GoBackbtn3.setVisible(false);  
+                window.location.href="story3.html" ;
+            })
+            GoNextPageBtn4.setVisible(false);
+
+            
+            GoToHomePage = this.add.sprite(80,50,'Home').setScale(0.09).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play();
+                GoToHomePage.setScale(0.12);
+            })
+            .on('pointerout',() => {
+                GoToHomePage.setScale(0.09);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play();
+                FristRoundText3.setVisible(false);
+                FristRoundText4.setVisible(false);       
+                GoNextPageBtn3.setVisible(false);
+                GoNextPageBtn4.setVisible(false);
+                GoToHomePage.setVisible(false);
+                Skip2.setVisible(false);
+                GoBackbtn2.setVisible(false);
+                GoBackbtn3.setVisible(false);
+                window.location.href="startGame.html" ;
+            })
+            GoToHomePage.setVisible(false);
+
+            GoBackbtn2 = this.add.sprite(70, 750,'goback').setScale(0.09).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play();
+                GoBackbtn2.setScale(0.11);
+            })
+            .on('pointerout',() => {
+                GoBackbtn2.setScale(0.09);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play();
+                FristRoundText3.setVisible(true);
+                FristRoundText4.setVisible(false);              
+                GoNextPageBtn3.setVisible(true);
+                GoNextPageBtn4.setVisible(false);
+                //GoToHomePage.setVisible(true);
+                GoBackbtn2.setVisible(false);
+                GoBackbtn3.setVisible(false);
+                window.location.href="map2.html" ;
+            })
+            GoBackbtn2.setVisible(false);         
+
+            GoBackbtn3 = this.add.sprite(70, 750,'goback').setScale(0.09).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play();
+                GoBackbtn3.setScale(0.11);
+            })
+            .on('pointerout',() => {
+                GoBackbtn3.setScale(0.09);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play();
+                FristRoundText3.setVisible(true);
+                FristRoundText4.setVisible(false);            
+                GoNextPageBtn3.setVisible(true);
+                GoNextPageBtn4.setVisible(false);
+                //GoToHomePage.setVisible(true);
+                GoBackbtn3.setVisible(false);
+                GoBackbtn2.setVisible(true);
+            })
+            GoBackbtn3.setVisible(false);
+    }
+
+    function update()
+    {
+        
+    }
+
+</script>
+</body>

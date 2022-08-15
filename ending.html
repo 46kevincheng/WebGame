@@ -1,0 +1,91 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
+    <!-- <script src="./dist/phaser.js"></script> 
+    <script src="./dist/phaser.min.js"></script>  -->
+</head>
+<style type="text/css">
+    body
+    {
+        display: block;
+        margin: 0 auto;
+    }
+</style>
+<body>
+    <script>
+        const config=
+        {
+            backgroundColor:"#000000",
+            type: Phaser.AUTO,
+            scale:
+            {
+                //mode:Phaser.Scale.FIT,
+                autoCenter:Phaser.Scale.CENTER_BOTH,
+                width: 1000,
+                height: 800,
+            },
+            physics:
+            {
+                default: 'arcade',
+                arcade:{
+                    debug:false,
+                    gravity:false
+                }
+            },
+            scene:
+            {
+                preload: preload,
+                create: create,
+                update: update
+            },
+        }
+        var game = new Phaser.Game(config);
+        var vid ;
+        let GoToHomePage;
+        // audio
+        let audioClickBtn ;
+        let audioHoverBtn ;
+
+        function preload()
+        {
+            this.load.video('credits', 'EndVideo.mp4');
+            this.load.image('Home','story/finalassets/Home.png');
+            this.load.audio('audioClickBtn','audio/click4.mp3') ;
+            this.load.audio('audioHoverBtn','audio/click2.mp3') ;
+        }
+        function create()
+        {
+            // add video
+            vid = this.add.video(500,400,'credits').setScale(0.65);
+            vid.play();
+            // Prevents video freeze when game is out of focus (i.e. user changes tab on the browser)
+            vid.setPaused(false);
+
+            // add audio
+            audioClickBtn = this.sound.add('audioClickBtn') ;
+            audioHoverBtn = this.sound.add('audioHoverBtn') ;
+
+            // home button
+            GoToHomePage = this.add.sprite(80,50,'Home').setScale(0.09).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play();
+                GoToHomePage.setScale(0.12);
+            })
+            .on('pointerout',() => {
+                GoToHomePage.setScale(0.09);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play();
+                GoToHomePage.setVisible(false);       
+                window.location.href="story/startGame.html" ;
+            })
+        }
+        function update()
+        {
+
+        }
+    </script>
+</body>

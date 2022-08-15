@@ -1,0 +1,561 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
+    <!-- <script src="./dist/phaser.js"></script> 
+    <script src="./dist/phaser.min.js"></script>  -->
+</head>
+<style type="text/css">
+    body
+    {
+        display: block;
+        margin: 0 auto;
+    }
+</style>
+<body>
+    <script>
+        const config=
+        {
+            backgroundColor:"#000000",
+            type: Phaser.AUTO,
+            scale:
+            {
+                //mode:Phaser.Scale.FIT,
+                autoCenter:Phaser.Scale.CENTER_BOTH,
+                width: 1050,
+                height: 900,
+            },
+            physics:
+            {
+                default: 'arcade',
+                arcade:{
+                    debug:false,
+                    gravity:false
+                }
+            },
+            scene:
+            {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        }
+        var game = new Phaser.Game(config);
+        let shan,akon; // two characters
+        let cursors; // read from keyboard
+        let player;
+        let playerdizzy;
+        let target;
+        let walls;
+        let grasses;
+
+        let wallsTween;
+        let grassesTween;
+
+        let myFont = {font:'30px Times New Roman', fill:'black'};
+        let nextFont = {fontSize: '30px',fontFamily:'標楷體', fill:'white',backgroundColor:'black',align:'center'};
+        let nextstageText;
+        let nextpagebtn ;
+        let trynum = 0;
+        let tryText;
+        let dizzy = 0 ; // 1=暈眩狀態, 0=正常
+        let lastkey = 0 ;
+        // audio
+        let audioBG ;
+        let audioBGb4start ;
+        let audioCollide ;
+        let audioClickBtn ;
+        let audioDoorOpen ;
+        let audioGameOver ;
+        let audioWin ;
+        let audioHoverBtn ;
+        let audioDizzy;
+        let audioFootstep ;
+        let isMoving = false;
+        // timer (設定同背景音樂長度)
+        let min = 7 ;
+        let sec = 30 ;
+        let tmpzero = 0 ;
+        let timerText ;
+        let restartBtn ;
+        let restartText;
+        let status = 0 ;
+        var myVal ;
+        let dizzycounter = 12 ;
+
+        //mask 
+        let mask1;
+        let mask2;
+        let mask3;
+        let mask4;
+        let mask5;
+        let mask6;
+        let mask7;
+        let mask8;
+        let mask9;
+        let mask10;
+        let mask11;
+        let mask12;
+        let mask13;
+        let mask14;
+        let mask15;
+
+        function preload()
+        {
+            //load two main characters
+            this.load.image('door','assests/halfdoor.png');
+            this.load.image('akon','assests/akon.png');
+            this.load.image('shan','assests/Xshan.png');
+            this.load.image('grass','assests/chair40.png');
+            this.load.image('wall','assests/ground.png');
+            this.load.image('wood','assests/wood.jpg');
+            this.load.image('curtainleft','assests/curtainleft.png');
+            this.load.image('curtainright','assests/curtainright.png');
+            this.load.image('intro','assests/game3intro.png');
+            this.load.image('ok','assests/OKbtn.png');
+            this.load.image('nextpagebutton','assests/nextpage.png');
+            this.load.image('speaker', 'assests/speaker.png');
+            this.load.image('mute', 'assests/mute.png');
+            this.load.image('bgmask1','assests/ma1.png');
+            this.load.image('bgmask2','assests/ma2.png');
+            this.load.image('bgmask3','assests/ma3.png');
+            this.load.image('passpic','assests/pass.png');
+            this.load.image('restartbtn','assests/restart.png') ;
+            this.load.image('timesuppic','assests/timesup.png') ;
+
+            this.load.audio('audioBG','../audio/Dunkirk.mp3') ;  // 7:58 min
+            this.load.audio('audioBGb4start','../audio/bgmusic5.mp3') ;
+            this.load.audio('audioCollide','../audio/impact.wav') ;
+            this.load.audio('audioDoorOpen','../audio/doorwood_open.wav') ;
+            this.load.audio('audioClickBtn','../audio/click4.mp3') ;
+            this.load.audio('audioGameOver','../audio/GameofThrones.mp3') ;
+            this.load.audio('audioWin','../audio/Champions.mp3') ;
+            this.load.audio('audioHoverBtn','../audio/click2.mp3') ;
+            this.load.audio('audioDizzy','../audio/dizzy.mp3') ;
+            this.load.spritesheet('dizzyRight','assests/dizzypic.png',{frameWidth:57.75, frameHeight:68});
+            this.load.audio('audioFootstep','../audio/footstep3.mp3') ;
+        }
+        
+        function create()
+        {
+
+            //method2
+            walls = this.physics.add.group();
+            for(var i=0;i<config.scale.width/25;i++)
+            {
+                for(var j=0 ; j<config.scale.height/25;j++ )
+                {
+                    walls.createMultiple([{key:'wall', repeat: 1, setXY:{x:40*i+10 , y:25*j+10}}])
+                }
+            }
+
+            //add grass to background
+            //grass use matrix
+            var gra = [
+                [25,65,105,145,185,225,265,305,345,745,785,825,865,905,945,985,1025],//1
+                [25,65,105,145,185,225,265,305,345,425,465,505,545,585,625,665,705,745,785,825,865,905,945,985,1025],//2
+                [25,65,105,145,185,345,425,465,665,705,745,785,825,865,905,945,985,1025],//3
+                [25,65,105,145,185,265,345,425,465,545,585,905,945,985,1025],//4
+                [25,65,105,145,185,265,425,465,585,625,665,705,745,785,825,905,945,985,1025],//5
+                [25,65,105,145,185,265,305,345,385,425,465,505,585,625,905,945,985,1025],//6
+                [25,65,105,145,185,345,585,625,705,745,785,825,865,905,945,985,1025],//7
+                [25,65,105,145,185,225,265,345,425,465,505,545,585,625,705,905,945,985,1025],//8
+                [25,65,105,145,185,225,345,585,625,785,825,905,945,985,1025],//9
+                [25,65,105,145,185,225,305,345,385,425,465,505,585,625,665,705,745,785,825,905,945,985,1025],//10
+                [25,65,105,145,185,225,585,625,785,905,945,985,1025],//11
+                [25,65,105,145,185,225,265,305,345,385,425,465,505,545,585,625,705,785,865,905,945,985,1025],//12
+                [25,65,105,145,185,225,385,585,705,785,905,945,985,1025],//13
+                [25,65,105,145,185,225,305,465,505,585,665,705,785,825,905,945,985,1025],//14
+                [25,65,105,145,185,225,305,345,385,425,465,505,665,705,905,945,985,1025],//15
+                [25,65,105,145,185,225,345,385,425,465,505,545,585,625,665,705,745,785,825,865,905,945,985,1025],//16
+                [25,65,105,145,185,225,265,345,505,545,585,625,665,705,745,785,825,865,905,945,985,1025],//17
+                [25,65,105,145,185,225,345,425,505,545,585,865,905,945,985,1025],//18
+                [25,65,105,145,185,225,305,345,425,505,545,585,665,705,745,785,865,905,945,985,1025],//19
+                [25,65,105,145,185,225,425,665,865,905,945,985,1025],//20
+                [25,65,105,145,185,225,265,305,345,385,425,465,505,545,585,625,665,745,785,825,865,905,945,985,1025],//21
+            ];
+
+            grasses = this.physics.add.group();
+            for(var i=0;i<21;i++)
+            {
+                for(var j=0;j<gra[i].length;j++)
+                {
+                    grasses.createMultiple([{key:'grass', repeat: 1, setXY:{x:gra[i][j] , y:40*(i+1)+38}}])
+                }
+            }
+            grasses.children.iterate((child)=>
+            {
+                child.setImmovable();
+            });
+
+            // // //add start point and end point
+            // for(var i=0;i<=config.scale.width/50;i++)
+            //     this.add.image(i*50+25,config.scale.height-25,'wall');
+
+            // 加背景圖
+            target = this.physics.add.image(550,45,'door').setScale(0.55);
+            //this.add.image(config.scale.width-50,config.scale.height-50,'akon');
+
+            //set sursors can get info from keybaord
+            cursors = this.input.keyboard.createCursorKeys();
+            this.input.mouse.disableContextMenu;
+            this.input.keyboard.enabled=false ;
+
+           
+
+            //暈眩動畫
+            this.anims.create({
+                key: 'dizzy',
+                frames: this.anims.generateFrameNumbers('dizzyRight',{start:0, end:2}),
+                frameRate: 10,
+                repeat: -1,
+                duration:6000
+            });
+
+            this.anims.create({
+                key: 'walk',
+                frames: [{key:'dizzyRight', frame:3}],
+                frameRate: 20
+            });
+
+
+            // 加入音效
+            audioBG = this.sound.add('audioBG') ;
+            audioBG.setVolume(0.8) ;
+            audioBGb4start = this.sound.add('audioBGb4start',{volume:0.3,loop:true});
+            audioBGb4start.play() ;
+            audioCollide = this.sound.add('audioCollide') ;
+            audioCollide.setVolume(0.2) ;
+            audioClickBtn = this.sound.add('audioClickBtn') ;
+            audioGameOver = this.sound.add('audioGameOver',{volume:0.7,loop:true}) ;
+            audioWin = this.sound.add('audioWin',{volume:0.6,loop:true}) ;
+            audioHoverBtn = this.sound.add('audioHoverBtn') ;
+            audioDoorOpen = this.sound.add('audioDoorOpen') ;
+            audioDizzy = this.sound.add('audioDizzy') ;
+            audioDizzy.setVolume(0.1) ;
+            audioFootstep =this.sound.add('audioFootstep',{volume:0.3,loop:true}) ;
+            audioFootstep.play() ;
+            audioFootstep.pause() ;
+
+            // set text
+            nextstageText = this.add.image(config.scale.width/2, config.scale.height/2,'passpic').setScale(0.6);
+            nextstageText.setVisible(false);
+            timerText = this.add.text(80,850,"Time: ", myFont);
+            timerText.setVisible(false) ;
+            
+
+            // 開頭 關卡介紹
+            introduce = this.add.image(540,450,'intro').setScale(0.5);
+            OKbtn = this.add.sprite(540,550,'ok').setScale(0.18).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play() ;
+                OKbtn.setScale(0.2);
+            })
+            .on('pointerout',() => {
+                OKbtn.setScale(0.18);
+            })
+            .on('pointerdown',() => {
+                status = 1 ;
+                audioClickBtn.play() ;
+                audioBGb4start.stop() ; // stop background music
+                audioBG.play() ;    // play timer music
+                this.input.keyboard.enabled=true ;
+                timerText.setVisible(true) ;
+                OKbtn.setVisible(false);
+                introduce.setVisible(false);
+                myVal = setInterval(setTimer, 1000);
+                maskon();
+            })
+
+            // 時間倒數完->關卡失敗->關卡重新
+            restartText = this.add.image(config.scale.width/2, config.scale.height/2,'timesuppic').setScale(0.6);
+            restartText.setVisible(false) ;
+            restartBtn = this.add.sprite(config.scale.width/2 -5,config.scale.height/2+40,'restartbtn').setScale(0.2).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play() ;
+                restartBtn.setScale(0.2);
+            })
+            .on('pointerout',() => {
+                restartBtn.setScale(0.18);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play() ;
+                console.log("click") ;
+                setTimeout("location.reload(true);", 100);  // refresh page after 0.1 secs
+                //location.reload(10000);    // refresh page
+                console.log("refresh") ;
+            })
+            restartBtn.setVisible(false) ;
+
+            // go to next page
+            nextpagebtn = this.add.sprite(config.scale.width/2 - 8,config.scale.height/2 + 40,'nextpagebutton').setScale(0.12).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play() ;
+                nextpagebtn.setScale(0.14);
+            })
+            .on('pointerout',() => {
+                nextpagebtn.setScale(0.12);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play() ;
+                console.log("next page") ;
+                window.location.href="../story/story6.html" ;
+            })
+            nextpagebtn.setVisible(false) ;
+
+            // music control
+            let playmusic = true ;
+            let speaker = this.add.image(25,config.scale.height-25,'speaker').setInteractive()
+            .on('pointerdown',()=>
+            {
+                if(speaker.texture.key == 'speaker')
+                {
+                    speaker.setTexture('mute');
+                }
+                else
+                {
+                    speaker.setTexture('speaker');
+                }
+                if(playmusic==false)
+                {
+                    playmusic = true ;
+                    audioBG.setMute(false);
+                    audioBGb4start.setMute(false);
+                    audioGameOver.setMute(false);
+                    audioWin.setMute(false);
+                }
+                else
+                {
+                    playmusic = false;
+                    audioBG.setMute(true);
+                    audioBGb4start.setMute(true);
+                    audioGameOver.setMute(true);
+                    audioWin.setMute(true);
+                }
+            });
+            //map mask
+            mask1 = this.add.image(105,150,'bgmask1').setAlpha(0).setVisible(false);
+            mask2 = this.add.image(105+210,150,'bgmask1').setAlpha(0).setVisible(false);
+            mask3 = this.add.image(105+210*2,150,'bgmask2').setAlpha(0).setVisible(false);
+            mask4 = this.add.image(105+210*3,150,'bgmask3').setAlpha(0).setVisible(false);
+            mask5 = this.add.image(105+210*4,150,'bgmask1').setAlpha(0).setVisible(false);
+
+            mask6 = this.add.image(105,450,'bgmask2').setAlpha(0).setVisible(false);
+            mask7 = this.add.image(105+210*1,450,'bgmask1').setAlpha(0).setVisible(false);
+            mask8 = this.add.image(105+210*2,450,'bgmask3').setAlpha(0).setVisible(false);
+            mask9 = this.add.image(105+210*3,450,'bgmask3').setAlpha(0).setVisible(false);
+            mask10 = this.add.image(105+210*4,450,'bgmask1').setAlpha(0).setVisible(false);
+
+            mask11 = this.add.image(105,750,'bgmask1').setAlpha(0).setVisible(false);
+            mask12 = this.add.image(105+210*1,750,'bgmask2').setAlpha(0).setVisible(false);
+            mask13 = this.add.image(105+210*2,750,'bgmask1').setAlpha(0).setVisible(false);
+            mask14 = this.add.image(105+210*3,750,'bgmask2').setAlpha(0).setVisible(false);
+            mask15 = this.add.image(105+210*4,750,'bgmask1').setAlpha(0).setVisible(false);
+            setInterval(shad,1000);
+
+             //akon control
+             player = this.physics.add.sprite(705,870,'shan').setScale(0.5);
+            
+            //player collider setup
+            player.setCollideWorldBounds(true);
+
+            //collider setup
+            this.physics.add.collider(player, grasses, collideWall);
+            targetColl = this.physics.add.collider(player, target, nextstage);
+
+            
+
+        }
+        function setTimer()
+        {
+            // show timer text
+            if(sec==0){
+                timerText.text="Time: " + min + ":" + sec + tmpzero;
+            }else if(sec<10){
+                timerText.text="Time: " + min + ":" + tmpzero + sec;
+            }else{
+                timerText.text="Time: " + min + ":" + sec ;
+            }
+
+            if(sec==0){
+                sec = 59 ;
+                min-- ;
+            }else{
+                sec-- ;
+            }
+            if(min<0){
+                clearInterval(myVal) ;
+                maskoff();
+                gameover() ;
+            }
+        }
+        function gameover()
+        {
+            clearInterval(myVal) ;
+            status = 2 ;
+            audioBG.stop() ;
+            audioGameOver.play() ;
+            restartText.setVisible(true) ;
+            restartBtn.setVisible(true) ;
+            //console.log("gameover") ;
+        }
+        function nextstage()
+        {
+            maskoff();
+            clearInterval(myVal) ;
+            audioBG.pause() ;
+            audioDoorOpen.play() ;
+            status = 2 ;
+            setTimeout("audioWin.play()", 2000);
+            nextstageText.setVisible(true);
+            nextpagebtn.setVisible(true) ;
+            targetColl.active = false ;
+            player.setPosition(538,70) ;
+            //console.log("win") ;
+        }
+        function collideWall()
+        {
+            dizzy=1;
+            audioCollide.play() ;
+            dizzycounter-- ;
+            if(dizzycounter<=0){
+                player.setPosition(705,870) ;
+                dizzycounter=12;
+            }else{
+                audioDizzy.play();
+                player.anims.play('dizzy',true); //暈眩動畫
+            }
+            //console.log("counter: ", dizzycounter);
+            setTimeout("dizzy=0;",3000) ;   // 三秒後改回正常狀態
+            
+            // get last pressed key
+            if(lastkey==1){ // if last pressed key is left then go right 2.5
+                player.x += 2.5 ;
+            }else if(lastkey==2){ // if last pressed key is right then go left 2.5
+                player.x += -2.5 ;
+            }
+            else if(lastkey==3){ // if last pressed key is up then go down 2.5
+                player.y += 2.5 ;
+            }
+            else if(lastkey==4){ // if last pressed key is down then go up 2.5
+                player.y += -2.5 ;
+            }
+            //console.log("collideWall") ;
+        }
+        function maskon()
+        {
+            mask1.setVisible(true);
+            mask2.setVisible(true);
+            mask3.setVisible(true);
+            mask4.setVisible(true);
+            mask5.setVisible(true);
+
+            mask6.setVisible(true);
+            mask7.setVisible(true);
+            mask8.setVisible(true);
+            mask9.setVisible(true);
+            mask10.setVisible(true);
+
+            mask11.setVisible(true);
+            mask12.setVisible(true);
+            mask13.setVisible(true);
+            mask14.setVisible(true);
+            mask15.setVisible(true);
+            
+        }
+        function maskoff()
+        {
+            mask1.setVisible(false);
+            mask2.setVisible(false);
+            mask3.setVisible(false);
+            mask4.setVisible(false);
+            mask5.setVisible(false);
+
+            mask6.setVisible(false);
+            mask7.setVisible(false);
+            mask8.setVisible(false);
+            mask9.setVisible(false);
+            mask10.setVisible(false);
+
+            mask11.setVisible(false);
+            mask12.setVisible(false);
+            mask13.setVisible(false);
+            mask14.setVisible(false);
+            mask15.setVisible(false);
+        }
+        function shad()
+        {
+            var rnm = roadRandom();
+            mask1.setAlpha(rnm);
+            mask2.setAlpha(rnm);
+            mask3.setAlpha(rnm);
+            mask4.setAlpha(rnm);
+            mask5.setAlpha(rnm);
+            mask6.setAlpha(rnm);
+            mask7.setAlpha(rnm);
+            mask8.setAlpha(rnm);
+            mask9.setAlpha(rnm);
+            mask10.setAlpha(rnm);
+            mask11.setAlpha(rnm);
+            mask12.setAlpha(rnm);
+            mask13.setAlpha(rnm);
+            mask14.setAlpha(rnm);
+            mask15.setAlpha(rnm);
+        }
+        function roadRandom()
+        {
+            var min = 0.7;
+            var max = 1;
+            var RNumber = Math.random() * (max - min) + min;
+            return RNumber;
+        }
+        function update()
+        {
+            // status=2 -> 玩家死掉或破關了
+            if(status == 1){
+                this.input.keyboard.enabled = true ;
+                audioFootstep.setMute(false);
+            }else if(status == 2){
+                audioFootstep.setMute(true);
+                this.input.keyboard.enabled = false ;
+            }
+
+            // 玩家可移動狀態
+            if(status!=2 && dizzy!=1){
+                player.anims.play('walk',true);
+
+                // keyboard control character
+                if(cursors.left.isDown)
+                {
+                    lastkey = 1 ;
+                    player.x += -2.5;
+                }
+                else if(cursors.right.isDown)
+                {
+                    lastkey = 2 ;
+                    player.x += 2.5;
+                }
+                else if(cursors.up.isDown)
+                {
+                    lastkey = 3 ;
+                    player.y += -2.5;
+                }
+                else if(cursors.down.isDown)
+                {
+                    lastkey = 4 ;
+                    player.y += 2.5;
+                }
+            }
+            // add footsteps
+            if((cursors.left.isDown || cursors.right.isDown || cursors.up.isDown || cursors.down.isDown) && !isMoving && dizzy!=1){
+                audioFootstep.resume() ;
+                this.isMoving=true ;
+            }else{
+                audioFootstep.pause() ;
+                this.isMoving=false ;
+            }this.isMoving=false ;
+        }
+    </script>
+</body>

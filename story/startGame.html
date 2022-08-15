@@ -1,0 +1,136 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
+</head>
+
+<style type="text/css">
+    body{
+        margin: 0;
+    }
+</style>
+<body>
+<script>
+    //設定
+    const config={
+        type:Phaser.AUTO,
+        width:1000,
+        height:800,
+        physics:{
+            default: 'arcade',
+            arcade:{
+                gravity: {y:200}
+            }
+        },
+        scene:{
+            preload:preload,
+            create:create,
+            update:update
+        },
+        scale:{
+            mode: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.CENTER_BOTH
+        }
+    };
+    //const game = new Phaser.Game(config);
+    var game = new Phaser.Game(config);
+
+    function preload(){
+        this.load.image('title','finalassets/Title.png');
+        this.load.image('startbutton','finalassets/start3.png');
+        this.load.image('introducebutton','finalassets/HowToPlay2.png');
+        this.load.image('lastpagebutton','finalassets/goback.png');
+        this.load.image('door','finalassets/door.png');
+        this.load.image('girl','finalassets/girlrm.png');
+        this.load.image('road','finalassets/road.png')
+        this.load.audio('audioClickBtn','../audio/click4.mp3') ;
+        this.load.audio('audioHoverBtn','../audio/click2.mp3') ;
+        this.load.audio('audioBG','../audio/Hope.mp3') ;
+    }
+
+    let backGround;
+    let startbtn;
+    let introducebtn;
+    let HowToPlayText;
+    let lastpagebtn;
+    // audio
+    let audioClickBtn ;
+    let audioHoverBtn ;
+    let audioBG ;
+
+    function create()
+    {
+        this.add.image(530,150,'title').setScale(0.8);
+        this.add.image(740,650,'road').setScale(1.4);
+        this.add.image(890,660,'girl').setScale(0.35);
+        this.add.image(190,420,'door').setScale(0.18);
+
+        //add audio
+        audioBG = this.sound.add('audioBG',{volume:1,loop:true});
+        audioBG.play();
+        audioClickBtn = this.sound.add('audioClickBtn') ;
+        audioHoverBtn = this.sound.add('audioHoverBtn') ;
+
+        let myFont = {font: '30px 微軟正黑體', fill:'white'};
+        HowToPlayText = this.add.text(config.width/2 + 10, config.height/2 + 50, "操作教學 : \n\n 上下左右 \n鍵操控人物", myFont).setOrigin(0.5);
+
+        startbtn = this.add.sprite(config.width/2, config.height/2,'startbutton').setScale(0.2).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play();
+                startbtn.setScale(0.22);
+            })
+            .on('pointerout',() => {
+                startbtn.setScale(0.2);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play();
+                console.log("next page") ;
+                window.location.href="story1.html" ;
+            })
+
+        introducebtn = this.add.sprite(config.width/2, config.height/2 + 160,'introducebutton').setScale(0.2).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play();
+                introducebtn.setScale(0.22);
+            })
+            .on('pointerout',() => {
+                introducebtn.setScale(0.2);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play();
+                HowToPlayText.setVisible(true);
+                startbtn.setVisible(false);
+                introducebtn.setVisible(false);
+                lastpagebtn.setVisible(true);
+            })
+
+            HowToPlayText.setVisible(false);
+
+        lastpagebtn = this.add.sprite(config.width/2, config.height/2 + 250,'lastpagebutton').setScale(0.13).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play();
+                lastpagebtn.setScale(0.15);
+            })
+            .on('pointerout',() => {
+                lastpagebtn.setScale(0.13);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play();
+                HowToPlayText.setVisible(false);
+                startbtn.setVisible(true);
+                introducebtn.setVisible(true);
+                lastpagebtn.setVisible(false);
+            })
+
+        lastpagebtn.setVisible(false);
+
+    }
+
+    function update()
+    {
+        
+    }
+
+</script>
+</body>

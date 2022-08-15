@@ -1,0 +1,160 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
+</head>
+
+<style type="text/css">
+    body{
+        margin: 0;
+    }
+</style>
+<body>
+<script>
+    //設定
+    const config={
+        type:Phaser.AUTO,
+        width:1000,
+        height:800,
+        physics:{
+            default: 'arcade',
+            arcade:{
+                gravity: {y:200}
+            }
+        },
+        scene:{
+            preload:preload,
+            create:create,
+            update:update
+        },
+        scale:{
+            mode: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.CENTER_BOTH
+        }
+    };
+    //const game = new Phaser.Game(config);
+    var game = new Phaser.Game(config);
+
+    function preload(){
+        
+        this.load.image('skip','finalassets/skip.png');
+        this.load.image('nextpage','finalassets/nextpage.png');
+        this.load.image('g2backgroumd','finalassets/p3.jpg');
+        this.load.image('map','finalassets/p8.jpg');
+        this.load.image('Home','finalassets/Home.png');
+        this.load.image('goback','finalassets/goback.png');
+        this.load.image('startbtn','finalassets/start3.png');
+        this.load.audio('audioClickBtn','../audio/click4.mp3') ;
+        this.load.audio('audioHoverBtn','../audio/click2.mp3') ;
+        this.load.audio('audioBG','../audio/flyffbg3.mp3') ;
+    }
+
+    let backGround;
+    let ThirdRoundText1;
+    let GoNextPageBtn3;
+    let GoToHomePage;
+    let GoBackbtn2;
+    let Skip2;
+    // audio
+    let audioClickBtn ;
+    let audioHoverBtn ;
+    let audioBG ;
+
+    function create()
+    {
+        //add audio
+        audioBG = this.sound.add('audioBG',{volume:0.4,loop:true});
+        audioBG.play();
+        audioClickBtn = this.sound.add('audioClickBtn') ;
+        audioHoverBtn = this.sound.add('audioHoverBtn') ;
+
+        this.add.image(config.width/2,50,'g2backgroumd').setScale(1);
+        this.add.image(config.width/2-350,600,'map').setScale(0.5);  
+
+        let myFont = {font: '32px 微軟正黑體', fill:'white'};
+        
+        ThirdRoundText1=this.add.text(config.width/2 + 80, config.height/2 - 30, "經過一番努力，\n小珊終於找到所需的物品，開始進行找尋儀式。\n(儀式進行時會有音樂帶領操作者\n找到要尋找的目標，\n音樂結束時，連結即跟著結束，\n如果尚未找到目標，則需重新操作儀式。)", myFont).setOrigin(0.5);   
+        ThirdRoundText1.setVisible(true);
+
+        GoNextPageBtn3 = this.add.sprite(config.width/2, config.height/2+250,'startbtn').setScale(0.14).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play();
+                GoNextPageBtn3.setScale(0.18);
+            })
+            .on('pointerout',() => {
+                GoNextPageBtn3.setScale(0.14);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play();
+                ThirdRoundText1.setVisible(false);    
+                GoNextPageBtn3 .setVisible(false);    
+                Skip2.setVisible(false);
+                GoBackbtn2.setVisible(false);
+                window.location.href="../game3/game3.html" ;
+            })
+
+        Skip2 = this.add.sprite(config.width/2+400, config.height/2 +350,'skip').setScale(0.09 ).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play();
+                Skip2.setScale(0.12);
+            })
+            .on('pointerout',() => {
+                Skip2.setScale(0.09);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play();
+                ThirdRoundText1.setVisible(false);
+                GoNextPageBtn3.setVisible(false);             
+                GoToHomePage.setVisible(false);
+                Skip2.setVisible(false);
+                GoBackbtn2.setVisible(false);              
+                window.location.href="../game3/game3.html" ;              
+            })
+            Skip2.setVisible(false);
+
+            GoToHomePage = this.add.sprite(80,50,'Home').setScale(0.09).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play();
+                GoToHomePage.setScale(0.12);
+            })
+            .on('pointerout',() => {
+                GoToHomePage.setScale(0.09);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play();
+                ThirdRoundText1.setVisible(false)    
+                GoNextPageBtn3.setVisible(false);           
+                GoToHomePage.setVisible(false);
+                Skip2.setVisible(false);
+                GoBackbtn2.setVisible(false);            
+                window.location.href="startGame.html" ;
+            })
+            GoToHomePage.setVisible(false);
+
+            GoBackbtn2 = this.add.sprite(70, 750,'goback').setScale(0.09).setInteractive()
+            .on('pointerover',() => {
+                audioHoverBtn.play();
+                GoBackbtn2.setScale(0.11);
+            })
+            .on('pointerout',() => {
+                GoBackbtn2.setScale(0.09);
+            })
+            .on('pointerdown',() => {
+                audioClickBtn.play();
+                ThirdRoundText1.setVisible(false);    
+                GoNextPageBtn3.setVisible(true);
+                GoToHomePage.setVisible(true);
+                GoBackbtn2.setVisible(false);
+                window.location.href="story5.html" ;
+            })
+            GoBackbtn2.setVisible(false);
+    }
+
+    function update()
+    {
+        
+    }
+
+</script>
+</body>
